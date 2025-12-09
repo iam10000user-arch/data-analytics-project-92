@@ -40,7 +40,6 @@ WITH avg_all AS (
     INNER JOIN products
         ON sales.product_id = products.product_id
 )
-
 SELECT
     CONCAT(
         TRIM(employees.first_name),
