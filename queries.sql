@@ -115,15 +115,15 @@ ORDER BY
 -- SUM calculates total monthly revenue.
 -- Data is grouped by month and sorted chronologically.
 SELECT
-    TO_CHAR(sales.sale_date, 'YYYY-MM') AS date,
+    TO_CHAR(sales.sale_date, 'YYYY-MM') AS sale_month,
     COUNT(DISTINCT sales.customer_id) AS total_customers,
-    SUM(products.price * sales.quantity) AS income
+    SUM(products.price * sales.quantity) AS total_income
 FROM sales
-INNER JOIN products
-    ON sales.product_id = products.product_id
+INNER JOIN products ON sales.product_id = products.product_id
 GROUP BY
     TO_CHAR(sales.sale_date, 'YYYY-MM')
-ORDER BY date ASC;
+ORDER BY
+    sale_month ASC;
 
 -- 7. First sales with free products
 -- CTE finds the earliest purchase date per customer.
@@ -138,7 +138,7 @@ WITH first_sales AS (
         ON sales.product_id = products.product_id
     GROUP BY sales.customer_id
 )
-    
+
 SELECT
     CONCAT(
         TRIM(customers.first_name),
@@ -163,8 +163,3 @@ INNER JOIN employees
     ON sales.sales_person_id = employees.employee_id
 WHERE products.price = 0
 ORDER BY customers.customer_id;
-
-
-
-
-
