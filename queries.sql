@@ -8,17 +8,17 @@ FROM customers;
 -- SUM to calculate total revenue, JOIN to connect tables,
 -- GROUP BY to group by seller, ORDER BY to sort descending, LIMIT to show top 10.
 SELECT
-    CONCAT(TRIM(e.first_name), ' ', TRIM(e.last_name)) AS seller,
-    COUNT(s.sales_id) AS operations,
-    SUM(p.price * s.quantity) AS income
-FROM sales s
-INNER JOIN employees e
-    ON s.sales_person_id = e.employee_id
-INNER JOIN products p
-    ON s.product_id = p.product_id
+    CONCAT(TRIM(employees.first_name), ' ', TRIM(employees.last_name)) AS seller,
+    COUNT(sales.sales_id) AS operations,
+    SUM(products.price * sales.quantity) AS income
+FROM sales
+INNER JOIN employees
+    ON sales.sales_person_id = employees.employee_id
+INNER JOIN products
+    ON sales.product_id = products.product_id
 GROUP BY
-    e.first_name,
-    e.last_name
+    employees.first_name,
+    employees.last_name
 ORDER BY income DESC
 LIMIT 10;
 
@@ -142,3 +142,4 @@ INNER JOIN employees e
     ON s.sales_person_id = e.employee_id
 WHERE p.price = 0
 ORDER BY c.customer_id;
+
