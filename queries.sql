@@ -1,67 +1,107 @@
-SELECT COUNT(customer_id) AS customer_count FROM customers;
---We use COUNT function - calculate the total number of customers--
-SELECT 
+-- 1. Count total customers
+SELECT
+    COUNT(customer_id) AS customer_count
+FROM customers;
+
+-- 2. Top 10 sellers by income
+-- We use COUNT to calculate the number of transactions per seller,
+-- SUM to calculate total revenue, JOIN to connect tables,
+-- GROUP BY to group by seller, ORDER BY to sort descending, LIMIT to show top 10.
+SELECT
     CONCAT(TRIM(e.first_name), ' ', TRIM(e.last_name)) AS seller,
     COUNT(s.sales_id) AS operations,
     SUM(p.price * s.quantity) AS income
 FROM sales s
-INNER JOIN employees e ON s.sales_person_id = e.employee_id
-INNER JOIN products p ON s.product_id = p.product_id
-GROUP BY e.first_name, e.last_name
+INNER JOIN employees e
+    ON s.sales_person_id = e.employee_id
+INNER JOIN products p
+    ON s.product_id = p.product_id
+GROUP BY
+    e.first_name,
+    e.last_name
 ORDER BY income DESC
 LIMIT 10;
---Here, we use the TRIM function to collect the employee's last name and first name, Count calculates the number of transactions for the seller, SUM calculates the total revenue--
---the JOIN function connects the tables, GROUP BY groups the results by seller, ORDER BY sorts the results from largest to smallest, and LIMIT shows only the first 10 results.--
+
+-- 3. Sellers with average income below overall average
+-- CTE calculates the overall average transaction value.
+-- Then we compute each seller's average income and compare it to the global average.
+-- Results are sorted ascending (worst to best).
 WITH avg_all AS (
-    SELECT 
+    SELECT
         AVG(p.price * s.quantity) AS avg_income_all
     FROM sales s
-    JOIN products p ON s.product_id = p.product_id
+    INNER JOIN products p
+        ON s.product_id = p.product_id
 )
-SELECT 
+SELECT
     CONCAT(TRIM(e.first_name), ' ', TRIM(e.last_name)) AS seller,
     FLOOR(AVG(p.price * s.quantity)) AS average_income
 FROM sales s
-JOIN employees e ON s.sales_person_id = e.employee_id
-JOIN products p ON s.product_id = p.product_id,
-     avg_all
-GROUP BY e.first_name, e.last_name, avg_all.avg_income_all
+INNER JOIN employees e
+    ON s.sales_person_id = e.employee_id
+INNER JOIN products p
+    ON s.product_id = p.product_id
+CROSS JOIN avg_all
+GROUP BY
+    e.first_name,
+    e.last_name,
+    avg_all.avg_income_all
 HAVING AVG(p.price * s.quantity) < avg_all.avg_income_all
 ORDER BY average_income ASC;
---Here, we use a CTE subquery to calculate the total average revenue for transactions, then we take all the sales and associate them with sellers and products. We use a subquery to access the average revenue for each company in each row.--
---Then, we calculate the average revenue for each seller. We use group by to group the sales by each seller, and we use having to compare the average revenue for each seller with the total average revenue.--
---Finally, we use order by to sort the list from worst to best.--
-SELECT 
+
+
+-- 4. Daily income by seller and day of week
+-- TRIM removes extra spaces, TO_CHAR converts date to day name,
+-- SUM aggregates daily income, FLOOR rounds down, EXTRACT gets day-of-week number for sorting.
+SELECT
     CONCAT(TRIM(e.first_name), ' ', TRIM(e.last_name)) AS seller,
     TRIM(TO_CHAR(s.sale_date, 'Day')) AS day_of_week,
     FLOOR(SUM(p.price * s.quantity)) AS income,
     EXTRACT(ISODOW FROM s.sale_date) AS day_num
 FROM sales s
-JOIN employees e ON s.sales_person_id = e.employee_id
-JOIN products p ON s.product_id = p.product_id
-GROUP BY e.first_name, e.last_name, TO_CHAR(s.sale_date, 'Day'), EXTRACT(ISODOW FROM s.sale_date)
-ORDER BY day_num, seller;
---Here we take the TRIM function to collect together the employee's last name and first name, TO_CHAR - converts the latz to days of the week, TRIM - removes unnecessary spaces, SUM - adds up everything for the day, FLOOR - rounds down to the nearest whole number.--
---EXTRACT - gives us the day of the week number, which is necessary for sorting, which we will do using ORDER BY at the end. Then we join the tables and group them by the necessary parameters, and sort them.--
-SELECT 
-    CASE 
+INNER JOIN employees e
+    ON s.sales_person_id = e.employee_id
+INNER JOIN products p
+    ON s.product_id = p.product_id
+GROUP BY
+    e.first_name,
+    e.last_name,
+    TO_CHAR(s.sale_date, 'Day'),
+    EXTRACT(ISODOW FROM s.sale_date)
+ORDER BY
+    day_num,
+    seller;
+
+-- 5. Customer age categories
+-- CASE distributes customers into age groups,
+-- COUNT(*) counts customers per group,
+-- ORDER BY manually sorts categories (16–25, 26–40, 40+).
+SELECT
+    CASE
         WHEN age BETWEEN 16 AND 25 THEN '16-25'
         WHEN age BETWEEN 26 AND 40 THEN '26-40'
         ELSE '40+'
     END AS age_category,
     COUNT(*) AS age_count
 FROM customers
-GROUP BY age_category
-ORDER BY 
-    CASE 
+GROUP BY
+    CASE
+        WHEN age BETWEEN 16 AND 25 THEN '16-25'
+        WHEN age BETWEEN 26 AND 40 THEN '26-40'
+        ELSE '40+'
+    END
+ORDER BY
+    CASE
         WHEN age_category = '16-25' THEN 1
         WHEN age_category = '26-40' THEN 2
         ELSE 3
     END;
---CASE END - distributes customers by age category.--
---Then, we look at the number of customers in each category--
---Grouped by age categories--
---And we create the sorting manually by assigning a number to each category--
+
+-- 6. Monthly income and unique customers
+-- TO_CHAR formats date as YYYY-MM,
+-- COUNT(DISTINCT) counts unique customers per month,
+-- SUM calculates total monthly revenue.
+-- Data is grouped by month and sorted chronologically.
 SELECT
     TO_CHAR(s.sale_date, 'YYYY-MM') AS date,
     COUNT(DISTINCT s.customer_id) AS total_customers,
@@ -72,12 +112,11 @@ INNER JOIN products p
 GROUP BY
     TO_CHAR(s.sale_date, 'YYYY-MM')
 ORDER BY date ASC;
---TO_CHAR - date is converted to a number--
---COUNT DISTINCT - number of unique customers--
---Then we calculate the total revenue for the month--
---Join the tables--
---Group the data by month--
---And sort from 1 to the last month--
+
+-- 7. First sales with free products
+-- CTE finds the earliest purchase date per customer.
+-- Then we join to get customer/seller names and filter for $0 products.
+-- Results are sorted by customer ID.
 WITH first_sales AS (
     SELECT
         s.customer_id,
@@ -103,7 +142,3 @@ INNER JOIN employees e
     ON s.sales_person_id = e.employee_id
 WHERE p.price = 0
 ORDER BY c.customer_id;
---Initially, we use a subquery to find the earliest purchase date--
---Then, we collect the names and surnames of the seller and the buyer--
---We join the tables and set conditions that the first purchase was a promotional offer--
---We sort the buyers by ID--
