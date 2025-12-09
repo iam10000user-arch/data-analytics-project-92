@@ -6,9 +6,11 @@ FROM customers;
 -- 2. Top 10 sellers by income
 -- We use COUNT to calculate the number of transactions per seller,
 -- SUM to calculate total revenue, JOIN to connect tables,
--- GROUP BY to group by seller, ORDER BY to sort descending, LIMIT to show top 10.
+-- GROUP BY to group by seller, ORDER BY to sort descending
+--LIMIT to show top 10.
 SELECT
-    CONCAT(TRIM(employees.first_name), ' ', TRIM(employees.last_name)) AS seller,
+    CONCAT(TRIM(employees.first_name), ' ', 
+    TRIM(employees.last_name)) AS seller,
     COUNT(sales.sales_id) AS operations,
     SUM(products.price * sales.quantity) AS income
 FROM sales
@@ -53,11 +55,10 @@ GROUP BY
 HAVING AVG(products.price * sales.quantity) < avg_all.avg_income_all
 ORDER BY average_income ASC;
 
-
-
 -- 4. Daily income by seller and day of week
 -- TRIM removes extra spaces, TO_CHAR converts date to day name,
--- SUM aggregates daily income, FLOOR rounds down, EXTRACT gets day-of-week number for sorting.
+-- SUM aggregates daily income, FLOOR rounds down
+--EXTRACT gets day-of-week number for sorting.
 SELECT
     CONCAT(
         TRIM(employees.first_name),
@@ -159,6 +160,7 @@ INNER JOIN employees
     ON sales.sales_person_id = employees.employee_id
 WHERE products.price = 0
 ORDER BY customers.customer_id;
+
 
 
 
