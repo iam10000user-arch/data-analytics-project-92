@@ -11,8 +11,9 @@ JOIN products p ON s.product_id = p.product_id
 GROUP BY e.first_name, e.last_name
 ORDER BY income DESC
 LIMIT 10;
-Здесь мы берем функцию TRIM чтобы собрать вместе фамилию и имя сотрудника, Count считает количество сделок для продавца, SUM - общую выручку
-функция JOIN состыкует таблицы меж собой, GROUP BY - группировка по продавцам, ORDER BY - сортировка от большего к меньшему, LIMIT - показывает только первые 10 результатов.
+
+Here, we use the TRIM function to collect the employee's last name and first name, Count calculates the number of transactions for the seller, SUM calculates the total revenue,
+the JOIN function connects the tables, GROUP BY groups the results by seller, ORDER BY sorts the results from largest to smallest, and LIMIT shows only the first 10 results.
 
 WITH avg_all AS (
     SELECT 
@@ -111,5 +112,6 @@ ORDER BY c.customer_id;
 Джойним таблицы
 ставим условия, что первая покупка была акционной
 И сортируем покупателей по ID
+
 
 
