@@ -62,13 +62,15 @@ ORDER BY
 --Then, we look at the number of customers in each category--
 --Grouped by age categories--
 --And we create the sorting manually by assigning a number to each category--
-SELECT 
+SELECT
     TO_CHAR(s.sale_date, 'YYYY-MM') AS date,
     COUNT(DISTINCT s.customer_id) AS total_customers,
     SUM(p.price * s.quantity) AS income
 FROM sales s
-JOIN products p ON s.product_id = p.product_id
-GROUP BY TO_CHAR(s.sale_date, 'YYYY-MM')
+INNER JOIN products p
+    ON s.product_id = p.product_id
+GROUP BY
+    TO_CHAR(s.sale_date, 'YYYY-MM')
 ORDER BY date ASC;
 --TO_CHAR - date is converted to a number--
 --COUNT DISTINCT - number of unique customers--
@@ -77,28 +79,35 @@ ORDER BY date ASC;
 --Group the data by month--
 --And sort from 1 to the last month--
 WITH first_sales AS (
-    SELECT 
+    SELECT
         s.customer_id,
         MIN(s.sale_date) AS first_date
     FROM sales s
-    JOIN products p ON s.product_id = p.product_id
+    INNER JOIN products p
+        ON s.product_id = p.product_id
     GROUP BY s.customer_id
 )
-SELECT 
+SELECT
     CONCAT(TRIM(c.first_name), ' ', TRIM(c.last_name)) AS customer,
     fs.first_date AS sale_date,
     CONCAT(TRIM(e.first_name), ' ', TRIM(e.last_name)) AS seller
 FROM first_sales fs
-JOIN sales s ON fs.customer_id = s.customer_id AND fs.first_date = s.sale_date
-JOIN products p ON s.product_id = p.product_id
-JOIN customers c ON s.customer_id = c.customer_id
-JOIN employees e ON s.sales_person_id = e.employee_id
+INNER JOIN sales s
+    ON fs.customer_id = s.customer_id
+    AND fs.first_date = s.sale_date
+INNER JOIN products p
+    ON s.product_id = p.product_id
+INNER JOIN customers c
+    ON s.customer_id = c.customer_id
+INNER JOIN employees e
+    ON s.sales_person_id = e.employee_id
 WHERE p.price = 0
 ORDER BY c.customer_id;
 --Initially, we use a subquery to find the earliest purchase date--
 --Then, we collect the names and surnames of the seller and the buyer--
 --We join the tables and set conditions that the first purchase was a promotional offer--
 --We sort the buyers by ID--
+
 
 
 
