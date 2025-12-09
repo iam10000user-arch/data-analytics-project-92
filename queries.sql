@@ -107,9 +107,3 @@ ORDER BY c.customer_id;
 --Then, we collect the names and surnames of the seller and the buyer--
 --We join the tables and set conditions that the first purchase was a promotional offer--
 --We sort the buyers by ID--
-
-
-
-
-
-
