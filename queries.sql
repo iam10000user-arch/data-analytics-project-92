@@ -1,6 +1,5 @@
 -- 1. Count total customers
-SELECT
-    COUNT(customer_id) AS customer_count
+SELECT COUNT(*) AS customers_count
 FROM customers;
 
 -- 2. Top 10 sellers by income
@@ -167,3 +166,4 @@ INNER JOIN employees
     ON sales.sales_person_id = employees.employee_id
 WHERE products.price = 0
 ORDER BY customers.customer_id;
+
