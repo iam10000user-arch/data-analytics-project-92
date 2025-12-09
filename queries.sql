@@ -6,7 +6,7 @@ SELECT
     SUM(p.price * s.quantity) AS income
 FROM sales s
 INNER JOIN employees e ON s.sales_person_id = e.employee_id
-JOIN products p ON s.product_id = p.product_id
+INNER JOIN products p ON s.product_id = p.product_id
 GROUP BY e.first_name, e.last_name
 ORDER BY income DESC
 LIMIT 10;
@@ -107,6 +107,7 @@ ORDER BY c.customer_id;
 --Then, we collect the names and surnames of the seller and the buyer--
 --We join the tables and set conditions that the first purchase was a promotional offer--
 --We sort the buyers by ID--
+
 
 
 
