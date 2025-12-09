@@ -1,11 +1,11 @@
-SELECT COUNT (customer_id) AS customer_count FROM customers;
+SELECT COUNT(customer_id) AS customer_count FROM customers;
 --We use COUNT function - calculate the total number of customers--
 SELECT 
     CONCAT(TRIM(e.first_name), ' ', TRIM(e.last_name)) AS seller,
     COUNT(s.sales_id) AS operations,
     SUM(p.price * s.quantity) AS income
 FROM sales s
-JOIN employees e ON s.sales_person_id = e.employee_id
+INNER JOIN employees e ON s.sales_person_id = e.employee_id
 JOIN products p ON s.product_id = p.product_id
 GROUP BY e.first_name, e.last_name
 ORDER BY income DESC
@@ -107,6 +107,7 @@ ORDER BY c.customer_id;
 --Then, we collect the names and surnames of the seller and the buyer--
 --We join the tables and set conditions that the first purchase was a promotional offer--
 --We sort the buyers by ID--
+
 
 
 
