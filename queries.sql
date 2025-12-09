@@ -9,8 +9,11 @@ FROM customers;
 -- GROUP BY to group by seller, ORDER BY to sort descending
 --LIMIT to show top 10.
 SELECT
-    CONCAT(TRIM(employees.first_name), ' ', 
-    TRIM(employees.last_name)) AS seller,
+    CONCAT(
+        TRIM(employees.first_name),
+        ' ',
+        TRIM(employees.last_name)
+    ) AS seller,
     COUNT(sales.sales_id) AS operations,
     SUM(products.price * sales.quantity) AS income
 FROM sales
@@ -160,6 +163,7 @@ INNER JOIN employees
     ON sales.sales_person_id = employees.employee_id
 WHERE products.price = 0
 ORDER BY customers.customer_id;
+
 
 
 
