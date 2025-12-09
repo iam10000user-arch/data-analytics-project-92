@@ -24,12 +24,14 @@ INNER JOIN products
 GROUP BY
     employees.first_name,
     employees.last_name
-ORDER BY income DESC
+ORDER BY
+    income DESC
 LIMIT 10;
 
 -- 3. Sellers with average income below overall average
 -- CTE calculates the overall average transaction value.
--- Then we compute each seller's average income and compare it to the global average.
+-- Then we compute each seller's average income 
+--and compare it to the global average.
 -- Results are sorted ascending (worst to best).
 WITH avg_all AS (
     SELECT
@@ -163,6 +165,7 @@ INNER JOIN employees
     ON sales.sales_person_id = employees.employee_id
 WHERE products.price = 0
 ORDER BY customers.customer_id;
+
 
 
 
