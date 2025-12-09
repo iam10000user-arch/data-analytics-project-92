@@ -1,5 +1,5 @@
 "select count(customer_id) as customer_count from customers;"
-Äàííûé çàïðîñ èñïîëüçóåò àãðåãèðóþùóþ ôóíêöèþ Count äëÿ ïîñ÷åò ïîëüçîâàòåëåé
+Берем Count чтобы сосчитать общее количество покупателей
 
 SELECT 
     CONCAT(TRIM(e.first_name), ' ', TRIM(e.last_name)) AS seller,
@@ -111,4 +111,5 @@ ORDER BY c.customer_id;
 Джойним таблицы
 ставим условия, что первая покупка была акционной
 И сортируем покупателей по ID
+
 
