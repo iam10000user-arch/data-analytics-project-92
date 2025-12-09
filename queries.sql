@@ -43,12 +43,12 @@ WITH per_seller AS (
     INNER JOIN products AS p ON s.product_id = p.product_id
     GROUP BY seller
 ),
-    
+
 overall AS (
     SELECT AVG(avg_income) AS avg_all
     FROM per_seller
 )
-    
+
 SELECT
     per_seller.seller,
     FLOOR(per_seller.avg_income) AS average_income
@@ -163,6 +163,7 @@ INNER JOIN employees
     ON sales.sales_person_id = employees.employee_id
 WHERE products.price = 0
 ORDER BY customers.customer_id;
+
 
 
 
