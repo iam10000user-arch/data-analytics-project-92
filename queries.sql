@@ -28,46 +28,55 @@ LIMIT 10;
 -- Results are sorted ascending (worst to best).
 WITH avg_all AS (
     SELECT
-        AVG(p.price * s.quantity) AS avg_income_all
-    FROM sales s
-    INNER JOIN products p
-        ON s.product_id = p.product_id
+        AVG(products.price * sales.quantity) AS avg_income_all
+    FROM sales
+    INNER JOIN products
+        ON sales.product_id = products.product_id
 )
 SELECT
-    CONCAT(TRIM(e.first_name), ' ', TRIM(e.last_name)) AS seller,
-    FLOOR(AVG(p.price * s.quantity)) AS average_income
-FROM sales s
-INNER JOIN employees e
-    ON s.sales_person_id = e.employee_id
-INNER JOIN products p
-    ON s.product_id = p.product_id
+    CONCAT(
+        TRIM(employees.first_name), 
+        ' ',
+        TRIM(employees.last_name)
+    ) AS seller,
+    FLOOR(AVG(products.price * sales.quantity)) AS average_income
+FROM sales
+INNER JOIN employees
+    ON sales.sales_person_id = employees.employee_id
+INNER JOIN products
+    ON sales.product_id = products.product_id
 CROSS JOIN avg_all
 GROUP BY
-    e.first_name,
-    e.last_name,
+    employees.first_name,
+    employees.last_name,
     avg_all.avg_income_all
-HAVING AVG(p.price * s.quantity) < avg_all.avg_income_all
+HAVING AVG(products.price * sales.quantity) < avg_all.avg_income_all
 ORDER BY average_income ASC;
+
 
 
 -- 4. Daily income by seller and day of week
 -- TRIM removes extra spaces, TO_CHAR converts date to day name,
 -- SUM aggregates daily income, FLOOR rounds down, EXTRACT gets day-of-week number for sorting.
 SELECT
-    CONCAT(TRIM(e.first_name), ' ', TRIM(e.last_name)) AS seller,
-    TRIM(TO_CHAR(s.sale_date, 'Day')) AS day_of_week,
-    FLOOR(SUM(p.price * s.quantity)) AS income,
-    EXTRACT(ISODOW FROM s.sale_date) AS day_num
-FROM sales s
-INNER JOIN employees e
-    ON s.sales_person_id = e.employee_id
-INNER JOIN products p
-    ON s.product_id = p.product_id
+    CONCAT(
+        TRIM(employees.first_name),
+        ' ',
+        TRIM(employees.last_name)
+    ) AS seller,
+    TRIM(TO_CHAR(sales.sale_date, 'Day')) AS day_of_week,
+    FLOOR(SUM(products.price * sales.quantity)) AS income,
+    EXTRACT(ISODOW FROM sales.sale_date) AS day_num
+FROM sales
+INNER JOIN employees
+    ON sales.sales_person_id = employees.employee_id
+INNER JOIN products
+    ON sales.product_id = products.product_id
 GROUP BY
-    e.first_name,
-    e.last_name,
-    TO_CHAR(s.sale_date, 'Day'),
-    EXTRACT(ISODOW FROM s.sale_date)
+    employees.first_name,
+    employees.last_name,
+    TO_CHAR(sales.sale_date, 'Day'),
+    EXTRACT(ISODOW FROM sales.sale_date)
 ORDER BY
     day_num,
     seller;
@@ -103,14 +112,14 @@ ORDER BY
 -- SUM calculates total monthly revenue.
 -- Data is grouped by month and sorted chronologically.
 SELECT
-    TO_CHAR(s.sale_date, 'YYYY-MM') AS date,
-    COUNT(DISTINCT s.customer_id) AS total_customers,
-    SUM(p.price * s.quantity) AS income
-FROM sales s
-INNER JOIN products p
-    ON s.product_id = p.product_id
+    TO_CHAR(sales.sale_date, 'YYYY-MM') AS date,
+    COUNT(DISTINCT sales.customer_id) AS total_customers,
+    SUM(products.price * sales.quantity) AS income
+FROM sales
+INNER JOIN products
+    ON sales.product_id = products.product_id
 GROUP BY
-    TO_CHAR(s.sale_date, 'YYYY-MM')
+    TO_CHAR(sales.sale_date, 'YYYY-MM')
 ORDER BY date ASC;
 
 -- 7. First sales with free products
@@ -119,27 +128,37 @@ ORDER BY date ASC;
 -- Results are sorted by customer ID.
 WITH first_sales AS (
     SELECT
-        s.customer_id,
-        MIN(s.sale_date) AS first_date
-    FROM sales s
-    INNER JOIN products p
-        ON s.product_id = p.product_id
-    GROUP BY s.customer_id
+        sales.customer_id,
+        MIN(sales.sale_date) AS first_date
+    FROM sales
+    INNER JOIN products
+        ON sales.product_id = products.product_id
+    GROUP BY sales.customer_id
 )
 SELECT
-    CONCAT(TRIM(c.first_name), ' ', TRIM(c.last_name)) AS customer,
-    fs.first_date AS sale_date,
-    CONCAT(TRIM(e.first_name), ' ', TRIM(e.last_name)) AS seller
-FROM first_sales fs
-INNER JOIN sales s
-    ON fs.customer_id = s.customer_id
-    AND fs.first_date = s.sale_date
-INNER JOIN products p
-    ON s.product_id = p.product_id
-INNER JOIN customers c
-    ON s.customer_id = c.customer_id
-INNER JOIN employees e
-    ON s.sales_person_id = e.employee_id
-WHERE p.price = 0
-ORDER BY c.customer_id;
+    CONCAT(
+        TRIM(customers.first_name),
+        ' ',
+        TRIM(customers.last_name)
+    ) AS customer,
+    first_sales.first_date AS sale_date,
+    CONCAT(
+        TRIM(employees.first_name),
+        ' ',
+        TRIM(employees.last_name)
+    ) AS seller
+FROM first_sales
+INNER JOIN sales
+    ON first_sales.customer_id = sales.customer_id
+    AND first_sales.first_date = sales.sale_date
+INNER JOIN products
+    ON sales.product_id = products.product_id
+INNER JOIN customers
+    ON sales.customer_id = customers.customer_id
+INNER JOIN employees
+    ON sales.sales_person_id = employees.employee_id
+WHERE products.price = 0
+ORDER BY customers.customer_id;
+
+
 
