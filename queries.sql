@@ -43,18 +43,16 @@ WITH per_seller AS (
     INNER JOIN products AS p ON s.product_id = p.product_id
     GROUP BY seller
 ),
-
 overall AS (
     SELECT AVG(avg_income) AS avg_all
     FROM per_seller
 )
-
 SELECT
-    seller,
-    FLOOR(avg_income) AS average_income
+    per_seller.seller,
+    FLOOR(per_seller.avg_income) AS average_income
 FROM per_seller
-cross join overall
-WHERE avg_income < avg_all
+CROSS JOIN overall
+WHERE per_seller.avg_income < overall.avg_all
 ORDER BY average_income ASC;
 
 -- 4. Daily income by seller and day of week
@@ -162,5 +160,6 @@ INNER JOIN employees
     ON sales.sales_person_id = employees.employee_id
 WHERE products.price = 0
 ORDER BY customers.customer_id;
+
 
 
