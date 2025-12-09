@@ -40,9 +40,10 @@ WITH avg_all AS (
     INNER JOIN products
         ON sales.product_id = products.product_id
 )
+
 SELECT
     CONCAT(
-        TRIM(employees.first_name), 
+        TRIM(employees.first_name),
         ' ',
         TRIM(employees.last_name)
     ) AS seller,
@@ -57,8 +58,10 @@ GROUP BY
     employees.first_name,
     employees.last_name,
     avg_all.avg_income_all
-HAVING AVG(products.price * sales.quantity) < avg_all.avg_income_all
-ORDER BY average_income ASC;
+HAVING
+    AVG(products.price * sales.quantity) < avg_all.avg_income_all
+ORDER BY
+    average_income ASC;
 
 -- 4. Daily income by seller and day of week
 -- TRIM removes extra spaces, TO_CHAR converts date to day name,
@@ -165,9 +168,3 @@ INNER JOIN employees
     ON sales.sales_person_id = employees.employee_id
 WHERE products.price = 0
 ORDER BY customers.customer_id;
-
-
-
-
-
-
