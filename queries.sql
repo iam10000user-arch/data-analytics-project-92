@@ -129,37 +129,37 @@ ORDER BY
 -- CTE finds the earliest purchase date per customer.
 -- Then we join to get customer/seller names and filter for $0 products.
 -- Results are sorted by customer ID.
-WITH first_sales AS (
+WITH ordered_sales AS (
     SELECT
-        sales.customer_id,
-        MIN(sales.sale_date) AS first_date
-    FROM sales
-    INNER JOIN products
-        ON sales.product_id = products.product_id
-    GROUP BY sales.customer_id
+        s.customer_id,
+        s.sale_date,
+        s.product_id,
+        s.sales_person_id,
+        ROW_NUMBER() OVER (
+            PARTITION BY s.customer_id
+            ORDER BY s.sale_date
+        ) AS rn
+    FROM sales AS s
+),
+
+first_sale AS (
+    SELECT
+        os.customer_id,
+        os.sale_date,
+        os.product_id,
+        os.sales_person_id
+    FROM ordered_sales AS os
+    WHERE os.rn = 1
 )
 
 SELECT
-    first_sales.first_date AS sale_date,
-    CONCAT(
-        TRIM(customers.first_name),
-        ' ',
-        TRIM(customers.last_name)
-    ) AS customer,
-    CONCAT(
-        TRIM(employees.first_name),
-        ' ',
-        TRIM(employees.last_name)
-    ) AS seller
-FROM first_sales
-    INNER JOIN sales
-        ON first_sales.customer_id = sales.customer_id
-        AND first_sales.first_date = sales.sale_date
-INNER JOIN products
-    ON sales.product_id = products.product_id
-INNER JOIN customers
-    ON sales.customer_id = customers.customer_id
-INNER JOIN employees
-    ON sales.sales_person_id = employees.employee_id   
-WHERE products.price = 0
-ORDER BY customers.customer_id;
+    fs.sale_date,
+    c.first_name || ' ' || c.last_name AS customer,
+    e.first_name || ' ' || e.last_name AS seller
+FROM first_sale AS fs
+INNER JOIN products AS p ON fs.product_id = p.product_id
+INNER JOIN customers AS c ON fs.customer_id = c.customer_id
+INNER JOIN employees AS e ON fs.sales_person_id = e.employee_id
+WHERE p.price = 0
+ORDER BY fs.customer_id;
+
