@@ -152,15 +152,14 @@ SELECT
         TRIM(employees.last_name)
     ) AS seller
 FROM first_sales
-INNER JOIN sales
-    ON first_sales.customer_id = sales.customer_id
-    AND first_sales.first_date = sales.sale_date
+    INNER JOIN sales
+        ON first_sales.customer_id = sales.customer_id
+        AND first_sales.first_date = sales.sale_date
 INNER JOIN products
     ON sales.product_id = products.product_id
 INNER JOIN customers
     ON sales.customer_id = customers.customer_id
 INNER JOIN employees
-    ON sales.sales_person_id = employees.employee_id    
+    ON sales.sales_person_id = employees.employee_id   
 WHERE products.price = 0
 ORDER BY customers.customer_id;
-
